@@ -1,120 +1,154 @@
-## MiniOS – A Minimal x86 Teaching Kernel
+# MiniOS – A Minimal x86 Teaching Kernel
 
-MiniOS is a from-scratch x86 kernel written in C and x86 assembly.
-It depicts how modern operating systems work at the lowest levels: from boot, to interrupts, to threading, memory management, and running user programs in ring3.
+*A pedagogical kernel that implements the skeleton of a Unix-like OS: from boot to user mode.*  
 
-The codebase walks through the fundamental mechanisms behind Unix-like kernels: bootstrapping, interrupts, memory management, scheduling, system calls, and user mode transitions.
+MiniOS is a compact operating system kernel written in **C and x86 assembly**.  
+It demonstrates the **core building blocks** of modern kernels:  
+bootstrapping, interrupts, device drivers, memory management, scheduling, syscalls, and user mode transitions.
 
 ---
 
-## Features Implemented
+## Table of Contents
+- [Features](#features)  
+- [Project Structure](#project-structure)  
+- [Prerequisites](#prerequisites)  
+- [Quick Start](#quick-start)  
+- [Architecture Overview](#architecture-overview)  
+- [Testing](#testing)  
+- [Documentation](#documentation)  
+- [Future Work](#future-work)  
+- [Authors](#authors)  
+- [License](#license)  
 
-### Bootloader & Protected Mode
+---
 
-Multiboot-compliant, GRUB loads the kernel ELF
+## Features
 
-Assembly entry point sets up the stack and jumps to the C kernel
+### Core Kernel ✅
+- **Bootloader & Protected Mode**
+  - Multiboot-compliant (GRUB)
+  - GDT setup, protected mode entry  
 
-### Console & Drivers
+- **Interrupts & Exceptions**
+  - IDT with ISR + IRQ stubs
+  - PIC remap, PIT timer at 100Hz
+  - Fault handlers for CPU exceptions  
 
-VGA text console (direct write to 0xB8000)
+- **Drivers**
+  - VGA text console (`0xB8000`)
+  - PS/2 keyboard (IRQ1, scancodes)  
 
-Keyboard driver (IRQ1, scancode translation)
+- **Threading & Scheduling**
+  - Cooperative + preemptive round-robin scheduler
+  - Context switching in assembly
+  - Demo kernel threads interleaving output  
 
-### Interrupts & Exceptions
+- **Memory Management**
+  - Paging enabled (identity map, 32MB)
+  - Kernel heap allocator  
 
-GDT with kernel and user segments
+- **Syscalls (`int 0x80`)**
+  - `SYS_write` → print string
+  - `SYS_yield` → yield CPU
+  - `SYS_sleep_ms` → sleep with PIT ticks
+  - DPL=3 syscall gate  
 
-IDT setup with ISR and IRQ stubs
-
-PIC remap to avoid conflicts with CPU exceptions
-
-PIT timer at 100Hz for preemption
-
-### Threading & Scheduling
-
-Cooperative + preemptive round-robin scheduler
-
-Context switch in assembly
-
-Demo threads printing interleaved output
-
-### Memory Management
-
-Paging enabled (identity map of first 32MB)
-
-Simple kernel heap allocator
-
-### Syscalls (int 0x80)
-
-SYS_write → print string via VGA
-
-SYS_yield → yield CPU to scheduler
-
-SYS_sleep_ms → sleep via PIT ticks
-
-DPL=3 syscall gate for user processes
-
-User Mode (Ring 3)
-
-TSS setup so interrupts from ring3 switch to kernel stack
-
-Entry to user mode with iret
-
-Demo ring3 program that calls sys_write and sys_sleep via int 0x80
+- **User Mode (Ring 3)**
+  - TSS stack switching
+  - `iret` transition to user space
+  - Demo ring3 process using syscalls  
 
 ---
 
 ## Project Structure
 
-boot/         # Bootloader entry (multiboot, stack setup)
-arch/x86/     # GDT, IDT, ISR, IRQ, PIC, PIT, syscalls, TSS, usermode
-kernel/       # Kernel entry and initialization
-drivers/      # VGA console, keyboard driver
-lib/          # printf, string, port I/O
-mm/           # Paging, heap allocator
-sched/        # Threading, context switch, scheduler
-user/         # Demo ring3 user program
-include/      # Shared headers
-grub.cfg      # GRUB config
-linker.ld     # Linker script
-Makefile      # Build system
+```text
+minios/
+ ├── boot/           # Multiboot entry, early assembly
+ ├── arch/x86/       # GDT, IDT, ISR, PIC, PIT, syscalls, TSS, usermode
+ ├── kernel/         # Kernel entry and initialization
+ ├── drivers/        # VGA console, keyboard
+ ├── lib/            # printf, string, port I/O helpers
+ ├── mm/             # Paging, heap allocator
+ ├── sched/          # Threading and scheduler
+ ├── user/           # Ring3 demo program
+ ├── include/        # Shared headers
+ ├── grub.cfg        # GRUB config
+ ├── linker.ld       # Linker script
+ └── Makefile        # Build system
+
+```
 
 ---
 
-## Building and Running
-### Toolchain
-Cross-compiler recommended: i686-elf-gcc, i686-elf-ld
-Requires: qemu-system-x86, grub-pc-bin, xorriso
-### Build
+## Prerequisites
+
+| Tool                          | Version        | Purpose                |
+| ----------------------------- | -------------- | ---------------------- |
+| `i686-elf-gcc`, `i686-elf-ld` | Cross-compiler | Build kernel           |
+| `qemu-system-x86`             | Latest         | Run kernel in emulator |
+| `grub-pc-bin`, `xorriso`      | Latest         | Build bootable ISO     |
+
+
+## Quick Start
+git clone https://github.com/<your-username>/minios.git
+cd minios
+
+## Build the kernel + ISO:
+
 make
-### Run under QEMU
+
+## Run in QEMU:
+
 make run
 
-### Expected Output
-MiniOS: booting (paging+syscalls+ring3)...
-[A][B][ring3] Hello from user mode via syscalls!
-[A], [B] → kernel threads scheduled round-robin
+## Architecture Overview
 
-[ring3] ... → user-mode process executing syscalls through int 0x80
+### System Components
 
-Keyboard input echoed via IRQ1 handler
+Bootloader → Multiboot + entry to C kernel
 
-## Future Extensions
+Initialization → GDT, IDT, paging, heap
 
+Core Services → VGA console, keyboard, PIT
+
+Scheduler → Preemptive round-robin
+
+Syscall ABI → int 0x80 with basic system calls
+
+User Mode → Ring 3 via TSS + iret
+
+## Testing
+Run the kernel in QEMU and validate:
+
+Timer interrupts trigger preemption (threads A and B interleave)
+
+Keyboard input is echoed via IRQ1
+
+Syscalls (write, yield, sleep) function correctly from ring3
+
+## Documentation
+| Document             | Purpose                                   |
+| -------------------- | ----------------------------------------- |
+| README.md            | Project overview, setup, quick start      |
+| docs/ARCHITECTURE.md | System architecture, diagrams             |
+| docs/DESIGN.md       | GDT/IDT setup, paging, syscall ABI        |
+| docs/FUTUREWORK.md   | Roadmap (ELF loader, SMP, FS, networking) |
+
+## Future Work
 ELF loader for standalone user binaries
 
-Per-process page tables and memory protection
+Per-process page tables and memory isolation
 
-Filesystem driver (e.g., FAT12 or EXT2)
+Filesystem driver (FAT/EXT)
 
 Networking stack (basic NIC + TCP/IP)
 
-Multiprocessor (SMP) bring-up and advanced scheduling
+Multiprocessor (SMP) scheduler
 
 ## Author
-Manoj Dattatreya Myneni (MMD)
 
-License
+Manoj Dattatreya Myneni (MMD) – University of Illinois Chicago
 
-MIT License — free to use for learning and educational purposes.
+## License
+This project is licensed under the [MIT License](LICENSE).
