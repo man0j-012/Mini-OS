@@ -1,0 +1,1 @@
+#pragma once\n#include <stdint.h>\n#include <stddef.h>\ntypedef void (*thread_fn)(void*);\nvoid sched_init(void);\nint  thread_create(thread_fn fn, void* arg, const char* name);\nvoid yield(void);\nvoid schedule_from_timer(void);\nvoid scheduler_dump(void);\n

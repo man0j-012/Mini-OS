@@ -1,0 +1,1 @@
+#pragma once\n#include <stddef.h>\nvoid heap_init(void* start, void* end);\nvoid* kmalloc(size_t size);\nvoid kfree(void* ptr);\n

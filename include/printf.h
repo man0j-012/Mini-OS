@@ -1,0 +1,1 @@
+#pragma once\n#include <stdarg.h>\nvoid kprintf(const char* fmt, ...);\n

@@ -1,0 +1,1 @@
+#pragma once\n#include <stdint.h>\nvoid port_outb(uint16_t p, uint8_t v);\nuint8_t port_inb(uint16_t p);\nvoid port_wait(void);\n

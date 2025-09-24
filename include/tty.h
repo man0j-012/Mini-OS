@@ -1,0 +1,1 @@
+#pragma once\n#include <stdint.h>\nvoid tty_clear(void);\nvoid tty_putc(char c);\nvoid tty_write(const char* s);\nvoid tty_write_hex(uint32_t v);\nvoid tty_write_dec(uint32_t v);\n

@@ -1,0 +1,1 @@
+#pragma once\n#include <stddef.h>\nint memcmp(const void* s1, const void* s2, size_t n);\nvoid* memcpy(void* dst, const void* src, size_t n);\nvoid* memset(void* dst, int c, size_t n);\nsize_t strlen(const char* s);\nchar* strcpy(char* dst, const char* src);\n

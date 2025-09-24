@@ -1,0 +1,1 @@
+#pragma once\n#include <stdint.h>\nvoid idt_install(void);\nvoid isr_install(void);\n

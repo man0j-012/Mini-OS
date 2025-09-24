@@ -1,0 +1,1 @@
+#pragma once\nvoid pit_init(void);\nextern volatile unsigned pit_ticks;\n

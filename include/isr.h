@@ -1,0 +1,1 @@
+#pragma once\n#include <stdint.h>\nstruct regs{uint32_t gs,fs,es,ds;uint32_t edi,esi,ebp,esp,ebx,edx,ecx,eax;uint32_t int_no,err_code;uint32_t eip,cs,eflags,useresp,ss;};\nvoid isr_handler(struct regs* r);\nvoid irq_handler(struct regs* r);\nvoid isr_install_stubs(void);\nvoid irq_install_stubs(void);\n

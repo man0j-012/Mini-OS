@@ -1,0 +1,1 @@
+#pragma once\nvoid pic_remap(int offset1, int offset2);\nvoid pic_send_eoi(int irq);\n

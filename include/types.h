@@ -1,0 +1,1 @@
+#pragma once\n#include <stdint.h>\n#include <stddef.h>\n
